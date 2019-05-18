@@ -8,6 +8,7 @@ Application enabling simple and intuitive handling serial communication.
 <img src="./img/printscreen3.png" height="250px">
 <img src="./img/printscreen4.png" height="250px">
 </p>
+
 ## Usage
 - Feel free to change it to any extent you may need! 
 - If you do not wish to do any changes to the program you can just double click on the `JSerialTerminal.jar` file and run the application.
