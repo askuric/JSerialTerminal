@@ -3,10 +3,12 @@ package serial.visual;
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
+import jssc.SerialPortException;
 import jssc.SerialPortList;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -23,6 +25,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -53,11 +56,15 @@ public class JSerialTerminal extends JFrame {
 	private JComboBox<Integer> baudrate;
 	private JComboBox<Item> termination;
 	private JTextField sendMessage;
+	//status label variables
+	private JLabel statusLabel;
+	private ImageIcon iconConnected;
+	private ImageIcon iconDisconnected;
 	
 	// shared variables
 	private String terminationSign;
 	private SerialPort serialPort;
-	protected Integer activeBaudrate;
+	private Integer activeBaudrate;
 
 	/**
 	 * Constructor method of the JSerialTerm class
@@ -88,11 +95,8 @@ public class JSerialTerminal extends JFrame {
 
 				if (confirmed == JOptionPane.YES_OPTION) {
 					if (serialPort != null && serialPort.isOpened()) {
-						try {
-							serialPort.closePort();
-						} catch (Exception e1) {
-							stackTraceToEditor(e1);
-						}
+						// close port
+						closeSerial();
 					}
 					dispose();
 				} else {
@@ -198,6 +202,15 @@ public class JSerialTerminal extends JFrame {
 		// send message button
 		toolBarBottom.add(new JButton(sendSerial));
 
+		toolBarBottom.addSeparator(new Dimension(100,20));
+		
+		// status label definition
+		iconConnected = new ImageIcon(new ImageIcon(JSerialTerminal.class.getResource("/conn.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
+		iconDisconnected = new ImageIcon(new ImageIcon(JSerialTerminal.class.getResource("/disconn.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
+		// initial state
+		statusLabel = new JLabel("Disconnected", iconDisconnected, JLabel.RIGHT);
+		toolBarBottom.add(statusLabel);
+		
 		// add toolbars
 		getContentPane().add(toolBarTop, BorderLayout.PAGE_START);
 		getContentPane().add(toolBarBottom, BorderLayout.PAGE_END);
@@ -267,6 +280,33 @@ public class JSerialTerminal extends JFrame {
 		});
 	}
 
+	/**
+	 * Utility method closing serial port and updating icon label for display
+	 */
+	private void closeSerial(){
+		try {
+			serialPort.closePort();
+			statusLabel.setIcon(iconDisconnected);
+			statusLabel.setText("Disconnected");
+		} catch (SerialPortException e) {
+			// closing not success
+			stackTraceToEditor(e);
+		}
+	}
+	/**
+	 * Utility method opening serial port and updating icon label for display
+	 */
+	private void startSerial(String name, int activeBaudrate){
+		try {
+			serialPort.openPort();
+			statusLabel.setIcon(iconConnected);
+			statusLabel.setText("Connected to " + name);
+			serialPort.setParams(activeBaudrate, 8, 1, 0);// Set params.
+		} catch (SerialPortException e) {
+			// closing not success
+			stackTraceToEditor(e);
+		}
+	}
 
 	/**
 	 * Serial port selected action, handles new port selected request
@@ -276,14 +316,8 @@ public class JSerialTerminal extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			// if port opened close it first
 			if (serialPort != null && serialPort.isOpened()) {
-				try {
-					// close port
-					serialPort.closePort();
-				} catch (Exception e1) {
-					//port not closed for some reason
-					stackTraceToEditor(e1);
-					return;
-				}
+				// close port
+				closeSerial();
 			}
 			// when no port opened any more
 			try {
@@ -347,8 +381,7 @@ public class JSerialTerminal extends JFrame {
 					activeBaudrate = baudrate.getItemAt(baudrate.getSelectedIndex());
 				}
 				// open the port
-				serialPort.openPort();
-				serialPort.setParams(activeBaudrate, 8, 1, 0);// Set params.
+				startSerial(ports.getItemAt(ports.getSelectedIndex()),activeBaudrate);
 				// display the success
 				editor.append("Port " + ports.getItemAt(ports.getSelectedIndex()) + " Opened!");
 				// add the port listener
@@ -380,16 +413,12 @@ public class JSerialTerminal extends JFrame {
 	private Action closeSerial = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			try {
-				// if port opened close it
-				if (serialPort != null && serialPort.isOpened()) {
-					serialPort.closePort();
-					// display success
-					editor.append("Port " + ports.getItemAt(ports.getSelectedIndex()) + " Closed!");
-				}
-			} catch (Exception e1) {
-				// error while closing
-				stackTraceToEditor(e1);
+			// if port opened close it
+			if (serialPort != null && serialPort.isOpened()) {
+				// close port
+				closeSerial();
+				// display success
+				editor.append("Port " + ports.getItemAt(ports.getSelectedIndex()) + " Closed!");
 			}
 		}
 	};
@@ -511,7 +540,6 @@ public class JSerialTerminal extends JFrame {
 	/**
 	 * Utility function outputting stack trace to the editor
 	 * 
-	 * @param e
 	 */
 	public void stackTraceToEditor(Throwable e) {
 		StringBuilder sb = new StringBuilder();
@@ -522,6 +550,7 @@ public class JSerialTerminal extends JFrame {
 		}
 		editor.append(sb.toString());
 	}
+	
 	
 	/**
 	 * Helping class for JComboBox for display (String) label to be different than the (String) value
