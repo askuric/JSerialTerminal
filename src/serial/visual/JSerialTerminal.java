@@ -62,7 +62,7 @@ public class JSerialTerminal extends JFrame {
 	private ImageIcon iconDisconnected;
 	
 	// shared variables
-	private String terminationSign;
+	private String terminationSign="";
 	private SerialPort serialPort;
 	private Integer activeBaudrate;
 
@@ -74,7 +74,7 @@ public class JSerialTerminal extends JFrame {
 	public JSerialTerminal() {
 		setTitle("JSerialTerm");
 		// icon adding
-		setIconImage(new ImageIcon(JSerialTerminal.class.getResource("/icon-512.png")).getImage());
+		setIconImage(new ImageIcon(JSerialTerminal.class.getResource("/img/icon-512.png")).getImage());
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		// size to open with
 		setSize(1000, 600);
@@ -205,8 +205,8 @@ public class JSerialTerminal extends JFrame {
 		toolBarBottom.addSeparator(new Dimension(100,20));
 		
 		// status label definition
-		iconConnected = new ImageIcon(new ImageIcon(JSerialTerminal.class.getResource("/conn.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
-		iconDisconnected = new ImageIcon(new ImageIcon(JSerialTerminal.class.getResource("/disconn.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
+		iconConnected = new ImageIcon(new ImageIcon(JSerialTerminal.class.getResource("/img/conn.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
+		iconDisconnected = new ImageIcon(new ImageIcon(JSerialTerminal.class.getResource("/img/disconn.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 		// initial state
 		statusLabel = new JLabel("Disconnected", iconDisconnected, JLabel.RIGHT);
 		toolBarBottom.add(statusLabel);
