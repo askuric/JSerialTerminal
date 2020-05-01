@@ -198,6 +198,8 @@ public class JSerialTerminal extends JFrame {
 		toolBarBottom.add(termination);
 		// send message textbox
 		sendMessage = new JTextField();
+		// enable enter sending
+		sendMessage.addActionListener(sendSerial);
 		toolBarBottom.add(sendMessage);
 		// send message button
 		toolBarBottom.add(new JButton(sendSerial));
